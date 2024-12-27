@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,11 +17,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { addDays, format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AppointmentFormValues {
   date: Date;
   timeSlot: string;
-  reason: string;
+  name: string;
+  phone: string;
+  email: string;
+  paymentMethod: "online" | "reception";
   additionalNotes: string;
 }
 
@@ -34,18 +45,31 @@ const timeSlots = [
 ];
 
 export default function Appointments() {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const { toast } = useToast();
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
+
+  useEffect(() => {
+    const tests = sessionStorage.getItem('selectedTests');
+    if (!tests) {
+      navigate('/categories');
+      return;
+    }
+    setSelectedTests(JSON.parse(tests));
+  }, [navigate]);
 
   const form = useForm<AppointmentFormValues>({
     defaultValues: {
-      reason: "",
+      paymentMethod: "reception",
       additionalNotes: "",
     },
   });
 
-  const onSubmit = (data: AppointmentFormValues) => {
-    console.log("Appointment data:", data);
+  const onSubmit = async (data: AppointmentFormValues) => {
+    // TODO: Integrate with Supabase to store appointment data
+    console.log("Appointment data:", { ...data, tests: selectedTests });
+    
     toast({
       title: "Appointment Scheduled",
       description: `Your appointment has been scheduled for ${format(
@@ -53,6 +77,12 @@ export default function Appointments() {
         "PPP"
       )} at ${data.timeSlot}`,
     });
+
+    // Clear selected tests from session storage
+    sessionStorage.removeItem('selectedTests');
+    
+    // Navigate to confirmation page (to be implemented)
+    navigate('/');
   };
 
   return (
@@ -88,30 +118,12 @@ export default function Appointments() {
               >
                 <FormField
                   control={form.control}
-                  name="timeSlot"
+                  name="name"
                   render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel>Select Time</FormLabel>
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid grid-cols-2 gap-4"
-                        >
-                          {timeSlots.map((slot) => (
-                            <FormItem
-                              key={slot}
-                              className="flex items-center space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <RadioGroupItem value={slot} />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {slot}
-                              </FormLabel>
-                            </FormItem>
-                          ))}
-                        </RadioGroup>
+                        <Input placeholder="Enter your full name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -120,12 +132,86 @@ export default function Appointments() {
 
                 <FormField
                   control={form.control}
-                  name="reason"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reason for Visit</FormLabel>
+                      <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="Brief description" {...field} />
+                        <Input placeholder="Enter your phone number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="timeSlot"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Time</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a time slot" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Payment Method</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="reception" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Pay at Reception
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="online" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Pay Online
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
