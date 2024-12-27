@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Phone } from "lucide-react";
 
 const Index = () => {
@@ -13,37 +13,23 @@ const Index = () => {
 
   const handleSendOTP = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
-      toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid phone number",
-        variant: "destructive",
-      });
+      toast.error("Please enter a valid phone number");
       return;
     }
     
     // TODO: Integrate with Supabase phone auth
     setShowOTP(true);
-    toast({
-      title: "OTP Sent",
-      description: "Please check your phone for the OTP",
-    });
+    toast.success("OTP sent to your phone number");
   };
 
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter a valid 6-digit OTP",
-        variant: "destructive",
-      });
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
     // TODO: Verify OTP with Supabase
-    toast({
-      title: "Success",
-      description: "OTP verified successfully",
-    });
+    toast.success("OTP verified successfully");
   };
 
   return (
@@ -90,8 +76,8 @@ const Index = () => {
                   maxLength={6}
                   render={({ slots }) => (
                     <InputOTPGroup>
-                      {slots.map((slot, index) => (
-                        <InputOTPSlot key={index} {...slot} index={index} />
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <InputOTPSlot key={i} index={i} />
                       ))}
                     </InputOTPGroup>
                   )}
