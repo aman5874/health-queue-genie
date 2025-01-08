@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import HospitalSelection from "./pages/HospitalSelection";
 import Appointments from "./pages/Appointments";
-import BookAppointment from "./pages/BookAppointment.tsx";
+import BookAppointment from "./pages/BookAppointment";
+import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
@@ -31,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute>
               <BookAppointment />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           } 
         />
