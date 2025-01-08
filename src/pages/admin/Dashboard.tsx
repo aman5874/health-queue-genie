@@ -1,41 +1,51 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
-import { motion } from "framer-motion";
 import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { AppointmentStats } from "@/components/admin/AppointmentStats";
-import { AppointmentList } from "@/components/admin/AppointmentList";
+import { supabase } from "@/lib/supabase";
+import { motion } from "framer-motion";
+import AppointmentList from "@/components/admin/AppointmentList";
+import AppointmentStats from "@/components/admin/AppointmentStats";
 
-export default function AdminDashboard() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+const AdminDashboard = () => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto p-6 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-8"
+        className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
       >
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        
         <AppointmentStats />
+      </motion.div>
 
-        <div className="grid md:grid-cols-[300px,1fr] gap-8">
-          <Card className="p-4">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Date</CardTitle>
+          </CardHeader>
+          <CardContent>
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
               className="rounded-md border"
             />
-          </Card>
+          </CardContent>
+        </Card>
 
-          <AppointmentList selectedDate={selectedDate} />
-        </div>
-      </motion.div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Appointments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AppointmentList selectedDate={selectedDate} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default AdminDashboard;
